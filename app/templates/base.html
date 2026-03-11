@@ -6,6 +6,44 @@
     <title>Pomodoro</title>
 </head>
 <body>
-    <h1>Test</h1>
+    <h1 id="timer"></h1>
+    <button onclick="pause()">Pause</button>
 </body>
 </html>
+
+<script>
+on = true
+const startingMinutes = 10;
+let time = startingMinutes * 60
+const countdownEl =document.getElementById('timer')
+const minutes = Math.floor(time/60);
+let seconds = time % 60;
+seconds = seconds < 10 ? '0' + seconds : seconds;
+
+countdownEl.innerHTML = `${minutes}:${seconds}`;
+
+
+function updateCountdown() {
+        time--;
+        time = time < 0 ? 0:time;
+
+        const minutes = Math.floor(time/60);
+        let seconds = time % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+
+        countdownEl.innerHTML = `${minutes}:${seconds}`;
+    }
+
+let intervalID = setInterval(updateCountdown, 1000);
+
+function pause() {
+    if (on) {
+        clearInterval(intervalID)
+        on = false
+    } else {
+        intervalID = setInterval(updateCountdown, 1000);
+        on = true
+    }
+    
+}
+</script>
