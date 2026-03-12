@@ -14,80 +14,85 @@
     <h1 id="timer">00:00</h1>
     <button onclick="pause()">Pause</button>
 </body>
-</html>
 
 <script>
-let on = false
-let current_status = NaN
-let pomodoros = 0
-let intervalID = null
-let countdownEl = document.getElementById('timer')
-let settings = {
-    'work': 5,
-    'break': 10,
-    'longBreak': 15,
-    'pomodoroIntervals': 4
-}
-let time = 0
-
-function timeOver() {
-    if (current_status == 'work'){
-        pomodoros += 1
-        console.log(pomodoros)
-        if (pomodoros % settings.pomodoroIntervals === 0){
-            
-            current_status = 'longBreak'
-        } else {
-            current_status = 'break'
-        }
-    } else {
-        current_status = 'work'
-    }
-    startPhase(current_status)
-}
-
-function startPhase(phase){
-    time = settings[phase]
-    intervalID = setInterval(updateCountdown, 1000);
-}
-
-function set_time() {
-    update_screen()
-
-    if (intervalID !== null) {
-        clearInterval(intervalID)
-    }
-}
-
-function update_screen() {
-    const minutes = Math.floor(time/60);
-    let seconds = time % 60;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-
-    countdownEl.textContent = `${minutes}:${seconds}`
-}
-
-function updateCountdown() {
-        time--;
-        if (time < 0){
-            time = 0
-            clearInterval(intervalID)
-            intervalID = null
-            timeOver()
-        }
-
-        update_screen()
-}
-
-
-function pause() {
-    if (on) {
-        clearInterval(intervalID)
-        on = false
-    } else {
-        intervalID = setInterval(updateCountdown, 1000);
-        on = true
+    let settings = {
+        'work': 5,
+        'break': 10,
+        'longBreak': 15,
+        'pomodoroIntervals': 4
     }
     
-}
-</script>
+    let state = {
+        running: false,
+        phase: 'work',
+        time: settings.work,
+        pomodoros: 0,
+        intervalID: null
+    }
+    
+    let countdownEl = document.getElementById('timer')
+    
+    function timeOver() {
+        if (state.phase == 'work'){
+            state.pomodoros += 1
+            if (state.pomodoros % settings.pomodoroIntervals === 0){
+                
+                state.phase = 'longBreak'
+            } else {
+                state.phase = 'break'
+            }
+        } else {
+            state.phase = 'work'
+        }
+        startPhase(state.phase)
+    }
+    
+    function startPhase(phase){
+        state.phase = phase
+        state.time = settings[phase]
+    
+        update_screen()
+    }
+    
+    function set_time() {
+        update_screen()
+    
+        if (state.intervalID !== null) {
+            clearInterval(state.intervalID)
+        }
+    }
+    
+    function update_screen() {
+        const minutes = Math.floor(state.time/60);
+        let seconds = state.time % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+    
+        countdownEl.textContent = `${minutes}:${seconds}`
+    }
+    
+    function updateCountdown() {
+        state.time--;
+        if (state.time < 0){
+            clearInterval(state.intervalID)
+            state.running = false
+            timeOver()
+        }
+        update_screen()
+    }
+    
+    
+    function pause() {
+        if (state.running) {
+            clearInterval(state.intervalID)
+            state.running = false
+        } else {
+            state.intervalID = setInterval(updateCountdown, 1000);
+            state.running = true
+        }
+        
+    }
+    </script>
+</html>
+
+
