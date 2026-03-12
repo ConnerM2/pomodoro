@@ -3,95 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
     <title>Pomodoro</title>
 </head>
 <body>
-    <form id="time_input">
-        <label for="time">Time:</label>
-        <input type="number" id="time", name="time">
-        <button type="button" onclick="set_time()">Enter</button>
-    </form>
-    <h1 id="timer">00:00</h1>
-    <button onclick="pause()">Pause</button>
+    <div id="timer_box" class="container text-center">
+        <h1 id="timer">00:00</h1>
+        <button id="button" onclick="pause()">Start</button>
+    </div>
+    
 </body>
 
 <script>
-    let settings = {
-        'work': 5,
-        'break': 10,
-        'longBreak': 15,
-        'pomodoroIntervals': 4
-    }
-    
-    let state = {
-        running: false,
-        phase: 'work',
-        time: settings.work,
-        pomodoros: 0,
-        intervalID: null
-    }
-    
-    let countdownEl = document.getElementById('timer')
-    
-    function timeOver() {
-        if (state.phase == 'work'){
-            state.pomodoros += 1
-            if (state.pomodoros % settings.pomodoroIntervals === 0){
-                
-                state.phase = 'longBreak'
-            } else {
-                state.phase = 'break'
-            }
+let button = document.getElementById('button')
+
+let settings = {
+    'work': 5,
+    'break': 10,
+    'longBreak': 15,
+    'pomodoroIntervals': 4
+}
+
+let state = {
+    running: false,
+    phase: 'work',
+    time: settings.work,
+    pomodoros: 0,
+    intervalID: null
+}
+
+let countdownEl = document.getElementById('timer')
+
+function timeOver() {
+    if (state.phase == 'work'){
+        state.pomodoros += 1
+        if (state.pomodoros % settings.pomodoroIntervals === 0){
+            
+            state.phase = 'longBreak'
         } else {
-            state.phase = 'work'
+            state.phase = 'break'
         }
-        startPhase(state.phase)
+    } else {
+        state.phase = 'work'
+    }
+    button.innerHTML = "Start next phase"
+    startPhase(state.phase)
+}
+
+function startPhase(phase){
+    state.phase = phase
+    state.time = settings[phase]
+
+    update_screen()
+}
+
+function set_time() {
+    update_screen()
+
+    if (state.intervalID !== null) {
+        clearInterval(state.intervalID)
+    }
+}
+
+function update_screen() {
+    const minutes = Math.floor(state.time/60);
+    let seconds = state.time % 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    countdownEl.textContent = `${minutes}:${seconds}`
+}
+
+function updateCountdown() {
+    state.time--;
+    if (state.time < 0){
+        clearInterval(state.intervalID)
+        state.running = false
+        timeOver()
+    }
+    update_screen()
+}
+
+
+function pause() {
+    if (state.running) {
+        clearInterval(state.intervalID)
+        state.running = false
+        button.innerHTML = 'Start'
+    } else {
+        state.intervalID = setInterval(updateCountdown, 1000);
+        state.running = true
+        button.innerHTML = 'Pause'
     }
     
-    function startPhase(phase){
-        state.phase = phase
-        state.time = settings[phase]
-    
-        update_screen()
-    }
-    
-    function set_time() {
-        update_screen()
-    
-        if (state.intervalID !== null) {
-            clearInterval(state.intervalID)
-        }
-    }
-    
-    function update_screen() {
-        const minutes = Math.floor(state.time/60);
-        let seconds = state.time % 60;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-    
-        countdownEl.textContent = `${minutes}:${seconds}`
-    }
-    
-    function updateCountdown() {
-        state.time--;
-        if (state.time < 0){
-            clearInterval(state.intervalID)
-            state.running = false
-            timeOver()
-        }
-        update_screen()
-    }
-    
-    
-    function pause() {
-        if (state.running) {
-            clearInterval(state.intervalID)
-            state.running = false
-        } else {
-            state.intervalID = setInterval(updateCountdown, 1000);
-            state.running = true
-        }
-        
-    }
+}
     </script>
 </html>
 
