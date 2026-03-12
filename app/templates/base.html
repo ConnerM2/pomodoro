@@ -18,14 +18,40 @@
 
 <script>
 let on = false
-let time = 0
+let current_status = NaN
+let pomodoros = 0
 let intervalID = null
 let countdownEl = document.getElementById('timer')
+let settings = {
+    'work': 5,
+    'break': 10,
+    'longBreak': 15,
+    'pomodoroIntervals': 4
+}
+let time = 0
+
+function timeOver() {
+    if (current_status == 'work'){
+        pomodoros += 1
+        console.log(pomodoros)
+        if (pomodoros % settings.pomodoroIntervals === 0){
+            
+            current_status = 'longBreak'
+        } else {
+            current_status = 'break'
+        }
+    } else {
+        current_status = 'work'
+    }
+    startPhase(current_status)
+}
+
+function startPhase(phase){
+    time = settings[phase]
+    intervalID = setInterval(updateCountdown, 1000);
+}
 
 function set_time() {
-    const time_input = document.getElementById('time');
-    const time_value = time_input.value
-    time = time_value * 60
     update_screen()
 
     if (intervalID !== null) {
@@ -43,11 +69,11 @@ function update_screen() {
 
 function updateCountdown() {
         time--;
-        time = time < 0 ? 0:time;
         if (time < 0){
             time = 0
             clearInterval(intervalID)
             intervalID = null
+            timeOver()
         }
 
         update_screen()
